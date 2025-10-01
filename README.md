@@ -1,27 +1,73 @@
 # RL-Drone: A Research Framework for Drone Control using Reinforcement Learning
 
+[![Docker Hub](https://img.shields.io/docker/pulls/haodpsut/rl_drone.svg)](https://hub.docker.com/r/haodpsut/rl_drone)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This repository provides a scalable and reproducible framework for developing and testing Reinforcement Learning algorithms for drone control tasks. It is built upon the robust `gym-pybullet-drones` simulation environment and leverages `stable-baselines3` for implementing state-of-the-art RL algorithms.
+This repository provides a scalable and reproducible framework for developing and testing Reinforcement Learning algorithms for drone control tasks. It is built upon the `gym-pybullet-drones` simulation environment and `stable-baselines3`.
 
-The primary goal of this framework is to facilitate research by providing a clean, configurable, and extensible codebase, enabling rapid prototyping and evaluation of new ideas for academic papers and personal projects.
+The primary goal is to facilitate research by providing a clean, configurable, and containerized environment, enabling rapid and reliable experimentation.
 
-## Features
+## Getting Started with Docker (Recommended)
 
-- **Reproducible Environment**: Comes with a `requirements.txt` file and Docker support (coming soon) to ensure consistent experimental setups.
-- **Configurable Experiments**: Utilizes YAML configuration files to easily manage environments, models, and hyperparameters without changing the source code.
-- **Scalable Structure**: The project is organized to easily add new custom environments, algorithms, and experiments.
-- **GPU Accelerated**: Optimized to leverage NVIDIA GPUs for faster training cycles.
-- **TensorBoard Integration**: Track your training progress with real-time logs and visualizations.
+This is the easiest and most reliable way to use this framework. The pre-built Docker image contains all necessary dependencies and is available on Docker Hub.
 
-## Getting Started
+**Note:** The default Docker image (`:latest` or `:1.0-cpu`) runs on **CPU**. This ensures it can be used on any machine, with or without an NVIDIA GPU.
 
 ### Prerequisites
 
-- [Conda](https://docs.conda.io/en/latest/miniconda.html) for environment management.
-- An NVIDIA GPU with CUDA drivers is highly recommended for training. This project was developed and tested with CUDA 12.1.
+- [Docker](https://docs.docker.com/get-docker/) installed on your system.
 
-### Installation
+### Installation & Usage
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/ailabteam/rl_drone.git
+    cd rl_drone
+    ```
+
+2.  **Pull the Docker image from Docker Hub:**
+    This downloads the ready-to-use CPU environment from the `haodpsut` repository.
+    ```bash
+    docker pull haodpsut/rl_drone:latest
+    ```
+
+3.  **Run the Docker container:**
+    This command starts an interactive session inside the container and mounts your local project folder. This allows you to edit code locally and run it inside the container immediately.
+    ```bash
+    docker run --rm -it -v "$(pwd):/app" haodpsut/rl_drone:latest
+    ```
+    *(For Windows CMD/PowerShell, replace `$(pwd)` with `%cd%`)*
+
+4.  **Start Training (Inside the Container):**
+    Once inside the container's shell, you can run experiments. The training will use the CPU.
+    ```bash
+    # You are now inside the container
+    python scripts/train.py --config configs/ppo_hover_config.yaml
+    ```
+    Results (models, logs) will be saved to your local `results/` folder.
+
+<details>
+<summary>For Developers: Building the image locally</summary>
+
+If you modify the `Dockerfile` or want to build the image from scratch, run the following command from the root directory:
+```bash
+docker build -t haodpsut/rl_drone:latest .
+```
+</details>
+
+## Local Installation (Alternative)
+
+If you prefer not to use Docker, you can set up a local Conda environment.
+
+<details>
+<summary>Click to expand Conda installation instructions</summary>
+
+### Prerequisites
+
+- [Conda](https://docs.conda.io/en/latest/miniconda.html)
+- Python 3.10
+
+### Installation Steps
 
 1.  **Clone the repository:**
     ```bash
@@ -30,62 +76,30 @@ The primary goal of this framework is to facilitate research by providing a clea
     ```
 
 2.  **Create and activate the Conda environment:**
-    This project uses Python 3.10.
     ```bash
     conda create -n rl_drone python=3.10 -y
     conda activate rl_drone
     ```
 
-3.  **Install PyTorch with CUDA support:**
-    Make sure to install the version compatible with your system's CUDA toolkit. The following command is for CUDA 12.1:
+3.  **Install all dependencies from the requirements file:**
+    *Note: This `requirements.txt` file may contain GPU-specific versions of libraries like PyTorch. You may need to install the appropriate CPU/GPU version for your system first.*
     ```bash
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-    ```
-
-4.  **Install all other dependencies:**
-    The `requirements.txt` file contains the exact versions of all necessary packages to ensure reproducibility.
-    ```bash
+    # Example for CPU PyTorch
+    # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
     pip install -r requirements.txt
     ```
-    
-    *Note: The `gym-pybullet-drones` library is installed in editable mode. If you haven't cloned it separately, you may need to do so:*
+
+4.  **Start Training:**
     ```bash
-    # (Only if you encounter issues with the above command)
-    # git clone https://github.com/utiasDSL/gym-pybullet-drones.git
-    # pip install -e ./gym-pybullet-drones
+    python scripts/train.py --config configs/ppo_hover_config.yaml
     ```
+</details>
 
 ## How to Use
 
-### 1. Training an Agent
-
-The main training script is `scripts/train.py`. It uses configuration files located in the `configs/` directory to define the experiment.
-
-To start training, run the following command from the root directory:
-```bash
-python scripts/train.py --config configs/ppo_hover_config.yaml
-```
-
-- **Configuration**: You can create your own `.yaml` files in the `configs/` directory to define new experiments.
-- **Results**: All training results, including models and logs, will be saved under the `results/` directory, organized by experiment name and timestamp.
-
-### 2. Monitoring with TensorBoard
-
-You can visualize the training progress in real-time using TensorBoard.
-
-1.  Open a new terminal and activate the conda environment:
-    ```bash
-    conda activate rl_drone
-    ```
-2.  Start the TensorBoard server:
-    ```bash
-    tensorboard --logdir results/tensorboard_logs
-    ```
-3.  Open your web browser and navigate to `http://localhost:6006`.
-
-### 3. Evaluating a Trained Agent
-
-(Coming soon) A script `scripts/evaluate.py` will be provided to load a trained model and visualize its performance in the simulation environment with a GUI.
+- **Training**: Run `scripts/train.py` with a specified config file.
+- **Evaluation**: Run `scripts/evaluate.py --exp-dir path/to/experiment/folder` to visualize a trained agent.
+- **Monitoring**: Use `tensorboard --logdir results/tensorboard_logs` to see training curves.
 
 ## Project Structure
 
@@ -96,9 +110,8 @@ rl_drone/
 ├── results/                # Output directory for models, logs, and plots
 ├── scripts/                # Main scripts (train, evaluate, etc.)
 ├── src/                    # Source code for custom environments, algorithms
-│   ├── environments/
-│   └── utils/
 ├── .gitignore              # Files to be ignored by Git
+├── Dockerfile              # Docker image definition for CPU
 ├── README.md               # This file
 └── requirements.txt        # Frozen Python dependencies
 ```
@@ -107,16 +120,9 @@ rl_drone/
 
 Contributions are welcome! If you have ideas for new features, environments, or improvements, feel free to open an issue to discuss it or submit a pull request.
 
-1.  Fork the repository.
-2.  Create a new branch (`git checkout -b feature/my-new-feature`).
-3.  Make your changes.
-4.  Commit your changes (`git commit -m 'Add some feature'`).
-5.  Push to the branch (`git push origin feature/my-new-feature`).
-6.  Open a Pull Request.
-
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## Acknowledgments
 
