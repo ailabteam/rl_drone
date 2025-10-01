@@ -1,0 +1,31 @@
+# configs/ppo_hover_config.yaml
+
+# --- Environment Configuration ---
+env_id: "hover-aviary-v0"
+n_envs: 8 # Số môi trường song song, có thể tăng lên tùy vào CPU cores
+seed: 42
+
+# --- Model Configuration ---
+policy: "MlpPolicy"
+total_timesteps: 500000
+
+# PPO Hyperparameters (các giá trị phổ biến)
+learning_rate: 0.0003
+n_steps: 2048
+batch_size: 64
+n_epochs: 10
+gamma: 0.99
+gae_lambda: 0.95
+clip_range: 0.2
+ent_coef: 0.0
+vf_coef: 0.5
+max_grad_norm: 0.5
+
+# --- Training & Logging Configuration ---
+log_interval: 1
+tb_log_name: "PPO_Hover" # Tên thư mục log trên TensorBoard
+
+# --- Evaluation Callback Configuration ---
+eval_freq: 10000 # Tần suất đánh giá, tính bằng số bước trên mỗi env
+n_eval_episodes: 5
+deterministic_eval: True
