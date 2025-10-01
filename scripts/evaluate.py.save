@@ -25,13 +25,13 @@ def evaluate(model_path: str, vec_normalize_path: str, env_id: str, n_episodes: 
     model = PPO.load(model_path)
     print(f"Model loaded from {model_path}")
 
-    # GIẢI PHÁP: Sử dụng trực tiếp giá trị timestep mặc định của mô phỏng.
-    # Tần số mô phỏng mặc định là 240Hz.
-    TIMESTEP = 1./240.
-
-    # Tạo môi trường đánh giá với GUI
+    # Tạo môi trường DummyVecEnv (chỉ 1 env) có bật GUI
     eval_env_creator = lambda: gym.make(env_id, gui=True)
     eval_env = DummyVecEnv([eval_env_creator])
+    
+    # Lấy timestep của môi trường để dùng cho hàm sync
+    # Chúng ta cần truy cập vào môi trường gốc bên trong DummyVecEnv
+    TIMESTEP = eval_env.get_attr("TIMESTEP")[0]
 
     eval_env = VecNormalize.load(vec_normalize_path, eval_env)
     eval_env.training = False
@@ -41,6 +41,7 @@ def evaluate(model_path: str, vec_normalize_path: str, env_id: str, n_episodes: 
 
     obs = eval_env.reset()
     for episode in range(n_episodes):
+        # Khởi tạo lại thời gian bắt đầu và biến đếm cho mỗi episode
         start_time = time.time()
         step_counter = 0
         terminated = False
@@ -53,9 +54,10 @@ def evaluate(model_path: str, vec_normalize_path: str, env_id: str, n_episodes: 
             obs, reward, terminated, info = eval_env.step(action)
             total_reward += reward[0]
 
-            # Gọi hàm sync với giá trị TIMESTEP đã được xác định
+            # Gọi hàm sync với đúng tham số: (iteration, start_time, timestep)
             sync(step_counter, start_time, TIMESTEP)
             
+            # Tăng biến đếm
             step_counter += 1
 
             if terminated or truncated:
@@ -89,4 +91,5 @@ if __name__ == '__main__':
         vec_normalize_path=vec_normalize_file,
         env_id=ENV_ID,
         n_episodes=args.episodes
-    )
+    ):q
+

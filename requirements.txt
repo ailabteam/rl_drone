@@ -29,7 +29,7 @@ fonttools==4.60.1
 fqdn==1.5.1
 fsspec==2024.6.1
 grpcio==1.75.1
--e git+https://github.com/utiasDSL/gym-pybullet-drones.git@fbcbacaacb63b516bab768c3e0fbd3184d54f744#egg=gym_pybullet_drones
+git+https://github.com/utiasDSL/gym-pybullet-drones.git@fbcbacaacb63b516bab768c3e0fbd3184d54f744#egg=gym_pybullet_drones
 gymnasium==0.29.1
 h11==0.16.0
 httpcore==1.0.9
@@ -129,9 +129,6 @@ tensorboard-data-server==0.7.2
 terminado==0.18.1
 tinycss2==1.4.0
 tomli==2.2.1
-torch==2.5.1+cu121
-torchaudio==2.5.1+cu121
-torchvision==0.20.1+cu121
 tornado==6.5.2
 tqdm==4.67.1
 traitlets==5.14.3
